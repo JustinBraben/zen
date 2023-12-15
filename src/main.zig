@@ -1,24 +1,53 @@
 const std = @import("std");
+const ArrayList = std.ArrayList;
+const print = std.debug.print;
 
-pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+const ComponentId = usize;
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+const Position = struct {
+    x: f32,
+    y: f32,
+};
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+const Entity = struct {
+    id: usize,
+};
 
-    try bw.flush(); // don't forget to flush!
-}
+const Registry = struct {
+    next_entity_id: usize,
+    components: ArrayList(ComponentId),
+    entities: ArrayList(Entity),
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+    pub fn init() Registry {
+        return Registry{
+            .next_entity_id = 0,
+            .components = undefined,
+            .entities = undefined,
+        };
+    }
+
+    pub fn create_entity(self: *Registry) Entity {
+        const entity_id = self.next_entity_id;
+        self.next_entity_id += 1;
+
+        const entity = Entity{ .id = entity_id };
+        self.entities.append(entity);
+
+        return entity;
+    }
+
+    pub fn add_component(self: *Registry, entity: Entity, component: Position) void {
+        _ = component;
+
+        const component_id = entity.id;
+        self.components.append(component_id);
+    }
+};
+
+pub fn main() void {
+    const registry = Registry.init();
+
+    //const entity = registry.create_entity();
+
+    print("The next entity id is: {}\n", .{registry.next_entity_id});
 }
