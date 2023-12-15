@@ -1,4 +1,5 @@
 const std = @import("std");
+const Pair = @import("pair.zig").Pair;
 const ArrayList = std.ArrayList;
 const print = std.debug.print;
 
@@ -13,7 +14,7 @@ const Entity = struct {
     id: usize,
 };
 
-const Registry = struct {
+pub const Registry = struct {
     next_entity_id: usize,
     components: ArrayList(ComponentId),
     entities: ArrayList(Entity),
@@ -50,4 +51,10 @@ pub fn main() void {
     //const entity = registry.create_entity();
 
     print("The next entity id is: {}\n", .{registry.next_entity_id});
+
+    const pair1 = Pair(u8, u16).new(0, 2);
+
+    print("I have created a : {}\n", .{@TypeOf(pair1)});
+    print("First : {} , Type : {}\n", .{ pair1.first, @TypeOf(pair1.first) });
+    print("Second : {} , Type : {}\n", .{ pair1.second, @TypeOf(pair1.second) });
 }
