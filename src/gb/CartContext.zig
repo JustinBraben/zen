@@ -1,4 +1,4 @@
-const RomHeader = @import("./configs/RomTypes.zig").RomHeader;
+const RomHeader = @import("./RomHeader.zig").RomHeader;
 
 pub const CartContext = @This();
 
@@ -9,9 +9,9 @@ rom_header: *RomHeader,
 
 pub fn init(pathToFile: []const u8) !CartContext {
     return CartContext{
-        .filename = pathToFile
+        .filename = pathToFile,
         .rom_size = 0,
         .rom_data = 0,
-        rom_header = RomHeader.init(),
+        .rom_header = RomHeader.init(),
     };
 }

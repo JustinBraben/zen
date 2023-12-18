@@ -1,7 +1,7 @@
 entry: [4]u8 = undefined,
 logo: [0x30]u8 = undefined,
 
-title: [16]const u8 = undefined,
+title: [16]u8 = undefined,
 new_lic_code: u16 = undefined,
 sgb_flag: u8 = undefined,
 typeName: u8 = undefined,

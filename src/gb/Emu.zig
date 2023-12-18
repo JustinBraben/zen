@@ -3,6 +3,7 @@ const c = @cImport({
 });
 const std = @import("std");
 const EmuContext = @import("EmuContext.zig").EmuContext;
+const Cart = @import("Cart.zig").Cart;
 
 pub const Emu = @This();
 
