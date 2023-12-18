@@ -17,12 +17,19 @@ pub const RomHeader = @This();
 
 pub fn init() !RomHeader {
     return RomHeader{
+        .entry              = undefined,
+        .logo               = undefined,
 
-    }
-}
-
-pub fn cart_load(cart: []const u8) bool{
-
-    
-    return true;
+        .title              = undefined,
+        .new_lic_code       = undefined,
+        .sgb_flag           = undefined,
+        .typeName           = undefined,
+        .rom_size           = undefined,
+        .ram_size           = undefined,
+        .dest_code          = undefined,
+        .lic_code           = undefined,
+        .version            = undefined,
+        .checksum           = undefined,
+        .global_checksum    = undefined,
+    };
 }

@@ -1,16 +1,17 @@
-const CartContext = @import("CartContext").CartContext;
+const RomHeader = @import("./configs/RomTypes.zig").RomHeader;
 
 pub const CartContext = @This();
 
 filename: []const u8,
 rom_size: u32,
 rom_data: *u8,
-rom_header: *CartContext,
+rom_header: *RomHeader,
 
-pub fn init() !EmuContext {
-    return EmuContext{
-        .paused = false,
-        .running = true,
-        .ticks = 0,
+pub fn init(pathToFile: []const u8) !CartContext {
+    return CartContext{
+        .filename = pathToFile
+        .rom_size = 0,
+        .rom_data = 0,
+        rom_header = RomHeader.init(),
     };
 }
