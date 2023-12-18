@@ -4,16 +4,22 @@ const c = @cImport({
 const std = @import("std");
 const assert = @import("std").debug.assert;
 const Registers = @import("gb/cpu.zig").Registers;
+const Emu = @import("gb/emu.zig").Emu;
 const ArrayList = std.ArrayList;
 const print = std.debug.print;
 
 pub fn main() !void {
+    std.debug.print("\n", .{});
 
-    //const registers = Registers{ .b = 0x12, .c = 0x34 };
+    var emu = Emu.new("../roms/Legend of Zelda, The - Link's Awakening (G) [!].gb");
 
-    //std.debug.print("Register B: {}, Register C: {}", .{registers.b, registers.c});
+    std.debug.print("Created new Emu : '{s}' , of type : '{}'\n", .{emu.romPath, @TypeOf(emu.romPath)});
 
-    try sdlExample();
+    const returnVal = try emu.emu_run();
+
+    std.debug.print("Returned code: {}\n", .{returnVal});
+
+    //try sdlExample();
 }
 
 pub fn sdlExample () !void {
