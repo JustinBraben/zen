@@ -2,25 +2,22 @@ const c = @cImport({
     @cInclude("SDL2/SDL.h");
 });
 const std = @import("std");
-
-romPath: []const u8,
-emu_context: struct {
-    paused: bool,
-    running: bool,
-    ticks: u64,
-},
+const EmuContext = @import("EmuContext.zig").EmuContext;
 
 pub const Emu = @This();
+
+romPath: []const u8,
+emu_context: EmuContext,
 
 pub fn new(pathToRom: []const u8) Emu {
     return .{
         .romPath = pathToRom, 
-        .emu_context = .{
-            .paused = false,
-            .running = true,
-            .ticks = 0,
-        },
+        .emu_context = try EmuContext.init(),
     };
+}
+
+pub fn emu_get_context(self: *Emu) *EmuContext {
+    return &self.emu_context;
 }
 
 pub fn emu_run(self: *Emu) !i8 {
@@ -65,4 +62,8 @@ pub fn emu_run(self: *Emu) !i8 {
     }
 
     return 0;
+}
+
+fn delay(ms: u32) void {
+    c.SDL_Delay(ms);
 }
