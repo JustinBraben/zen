@@ -1,5 +1,6 @@
 const std = @import("std");
-const Pair = @import("pair.zig").Pair;
+const Pair = @import("data_structures/pair.zig").Pair;
+const Registry = @import("ecs/registry.zig").Registry;
 const ArrayList = std.ArrayList;
 const print = std.debug.print;
 
@@ -10,47 +11,18 @@ const Position = struct {
     y: f32,
 };
 
-const Entity = struct {
-    id: usize,
-};
+pub fn main() !void {
+    var reg = Registry.init(std.heap.c_allocator);
+    defer reg.deinit();
 
-pub const Registry = struct {
-    next_entity_id: usize,
-    components: ArrayList(ComponentId),
-    entities: ArrayList(Entity),
+    //print("The next entity id is: {}\n", .{reg.next_entity_id});
 
-    pub fn init() Registry {
-        return Registry{
-            .next_entity_id = 0,
-            .components = undefined,
-            .entities = undefined,
-        };
+    var count: u64 = 0;
+
+    while (count < 5) : (count += 1) {
+        const entityId = try reg.addEntity();
+        print("Created entity with id = {}\n", .{entityId});
     }
-
-    pub fn create_entity(self: *Registry) Entity {
-        const entity_id = self.next_entity_id;
-        self.next_entity_id += 1;
-
-        const entity = Entity{ .id = entity_id };
-        self.entities.append(entity);
-
-        return entity;
-    }
-
-    pub fn add_component(self: *Registry, entity: Entity, component: Position) void {
-        _ = component;
-
-        const component_id = entity.id;
-        self.components.append(component_id);
-    }
-};
-
-pub fn main() void {
-    const registry = Registry.init();
-
-    //const entity = registry.create_entity();
-
-    print("The next entity id is: {}\n", .{registry.next_entity_id});
 
     const pair1 = Pair(u8, u16).new(0, 2);
 

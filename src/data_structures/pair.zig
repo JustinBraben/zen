@@ -32,5 +32,4 @@ fn compareUnequalType(comptime firstTypeName: type, comptime secondTypeName: typ
 test "compare unequal type error" {
     const testPair = Pair(u16, [4]u16).new(1, .{ 1, 2, 3, 4 });
     try testing.expectError(error.UnequalType, compareUnequalType(@TypeOf(testPair.first), @TypeOf(testPair.second)));
-    try testing.expectError(expected_error: anyerror, testPair.first == testPair.second);
 }
