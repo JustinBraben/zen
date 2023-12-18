@@ -3,25 +3,21 @@ const c = @cImport({
 });
 const std = @import("std");
 const assert = @import("std").debug.assert;
-const Pair = @import("data_structures/pair.zig").Pair;
+const Registers = @import("gb/cpu.zig").Registers;
 const ArrayList = std.ArrayList;
 const print = std.debug.print;
 
-const ComponentId = usize;
-
-const Position = struct {
-    x: f32,
-    y: f32,
-};
-
 pub fn main() !void {
-    const pair1 = Pair(u8, u16).new(0, 2);
 
-    print("I have created a : {}\n", .{@TypeOf(pair1)});
-    print("First : {} , Type : {}\n", .{ pair1.first, @TypeOf(pair1.first) });
-    print("Second : {} , Type : {}\n", .{ pair1.second, @TypeOf(pair1.second) });
+    //const registers = Registers{ .b = 0x12, .c = 0x34 };
 
-    if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
+    //std.debug.print("Register B: {}, Register C: {}", .{registers.b, registers.c});
+
+    try sdlExample();
+}
+
+pub fn sdlExample () !void {
+if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
         c.SDL_Log("Unable to initialize SDL: %s", c.SDL_GetError());
         return error.SDLInitializationFailed;
     }
