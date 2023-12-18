@@ -44,29 +44,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: prepare-linux
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt install xz-utils
-          sudo sh -c "wget -c https://pkg.machengine.org/zig/zig-linux-x86_64-${{ steps.get-zig-version.outputs.version }}.tar.xz -O - | tar -xJ --strip-components=1 -C /usr/local/bin"
-          sudo apt-get install libglu1-mesa-dev mesa-common-dev xorg-dev libasound-dev
-
-      - name: prepare-macOS
-        if: runner.os == 'macOS'
-        run: |
-          brew uninstall --ignore-dependencies libx11 # https://github.com/ziglang/zig/issues/11066
-          brew install xz
-          sudo sh -c "wget -c https://pkg.machengine.org/zig/zig-macos-x86_64-${{ steps.get-zig-version.outputs.version }}.tar.xz -O - | tar -xJ --strip-components=1 -C /usr/local/bin"
+      - name: prepare-linux-or-macOS
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: ./scripts/install_zig.sh
 
       - name: prepare-windows
         if: runner.os == 'Windows'
-        run: |
-          $ProgressPreference = 'SilentlyContinue'
-          Invoke-WebRequest -Uri "https://pkg.machengine.org/zig/zig-windows-x86_64-${{ steps.get-zig-version.outputs.version }}.zip" -OutFile 'C:\zig.zip'
-          cd C:\
-          7z x zig.zip
-          Add-Content $env:GITHUB_PATH "C:\zig-windows-x86_64-${{ steps.get-zig-version.outputs.version }}\"
+        run: .\scripts\install_zig.bat
 
       - name: build
         run: zig build
