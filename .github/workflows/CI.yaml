@@ -23,34 +23,16 @@ jobs:
   build:
     strategy:
       matrix:
+        arch: [x86_64]
         os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
-      - name: Get Latest Zig Version
-        id: get-zig-version
-        run: |
-          # Use curl and jq to get the latest Zig version from the index.json file
-          latest_version=$(curl -s 'https://ziglang.org/download/index.json' | jq -r '.master.version')
-
-          # Print the latest Zig version
-          echo "Latest Zig version: $latest_version"
-
-          # Set the output variable for use in subsequent steps
-          echo "::set-output name=version::$latest_version"
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Checkout Code
         uses: actions/checkout@v2
-
-      - name: prepare-linux-or-macOS
-        if: runner.os == 'Linux' || runner.os == 'macOS'
-        run: ./scripts/install_zig.sh
-
-      - name: prepare-windows
-        if: runner.os == 'Windows'
-        run: .\scripts\install_zig.bat
-
+      - name: Setup Zig
+        uses: actions/setup-zig@v1
+        #with:
+        #  version: 0.12.0
       - name: build
         run: zig build
