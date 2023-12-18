@@ -7,6 +7,17 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "doc/**"
+      - "README.md"
+      - "**.md"
+      - "LICENSE**"
+  pull_request:
+    paths-ignore:
+      - "doc/**"
+      - "README.md"
+      - "**.md"
+      - "LICENSE**"
 
 jobs:
   build:
@@ -15,15 +26,47 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{matrix.os}}
     steps:
-      - uses: actions/checkout@v2
-      - uses: goto-bus-stop/setup-zig@v2
-        #with:
-        #  version: 0.11.0
+      - name: Get Latest Zig Version
+        id: get-zig-version
+        run: |
+          # Use curl and jq to get the latest Zig version from the index.json file
+          latest_version=$(curl -s 'https://ziglang.org/download/index.json' | jq -r '.master.version')
+
+          # Print the latest Zig version
+          echo "Latest Zig version: $latest_version"
+
+          # Set the output variable for use in subsequent steps
+          echo "::set-output name=version::$latest_version"
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
       - name: prepare-linux
         if: runner.os == 'Linux'
         run: |
-            sudo apt-get update
-            sudo apt-get install libglu1-mesa-dev mesa-common-dev xorg-dev libasound-dev
+          sudo apt-get update
+          sudo apt install xz-utils
+          sudo sh -c "wget -c https://pkg.machengine.org/zig/zig-linux-x86_64-${{ steps.get-zig-version.outputs.version }}.tar.xz -O - | tar -xJ --strip-components=1 -C /usr/local/bin"
+          sudo apt-get install libglu1-mesa-dev mesa-common-dev xorg-dev libasound-dev
+
+      - name: prepare-macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew uninstall --ignore-dependencies libx11 # https://github.com/ziglang/zig/issues/11066
+          brew install xz
+          sudo sh -c "wget -c https://pkg.machengine.org/zig/zig-macos-x86_64-${{ steps.get-zig-version.outputs.version }}.tar.xz -O - | tar -xJ --strip-components=1 -C /usr/local/bin"
+
+      - name: prepare-windows
+        if: runner.os == 'Windows'
+        run: |
+          $ProgressPreference = 'SilentlyContinue'
+          Invoke-WebRequest -Uri "https://pkg.machengine.org/zig/zig-windows-x86_64-${{ steps.get-zig-version.outputs.version }}.zip" -OutFile 'C:\zig.zip'
+          cd C:\
+          7z x zig.zip
+          Add-Content $env:GITHUB_PATH "C:\zig-windows-x86_64-${{ steps.get-zig-version.outputs.version }}\"
+
       - name: build
         run: zig build
-  
