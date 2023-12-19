@@ -6,7 +6,6 @@ const assert = @import("std").debug.assert;
 const Registers = @import("gb/Cpu.zig").Registers;
 const Emu = @import("gb/Emu.zig").Emu;
 const RomTypes = @import("gb/configs/RomTypes.zig").RomTypes;
-const LicenseCodes = @import ("gb/configs/LicenseCodes.zig").LicenseCodes;
 const ArrayList = std.ArrayList;
 const print = std.debug.print;
 
@@ -28,11 +27,11 @@ pub fn main() !void {
 
     var emu = Emu.new(alloc, "../roms/Legend of Zelda, The - Link's Awakening (G) [!].gb");
 
-    std.debug.print("Created new Emu : '{s}' , of type : '{}'\n", .{emu.romPath, @TypeOf(emu.romPath)});
+    std.debug.print("Created new Emu : '{s}' , of type : '{}'\n", .{ emu.romPath, @TypeOf(emu.romPath) });
 
     std.debug.print("emu_get_context returns this type: {}\n", .{@TypeOf(emu.emu_get_context())});
 
-    for(RomTypes) |RomType| {
+    for (RomTypes) |RomType| {
         std.debug.print("Rom Type : {s}\n", .{RomType});
     }
 

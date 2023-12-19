@@ -18,6 +18,7 @@ on:
       - "README.md"
       - "**.md"
       - "LICENSE**"
+  workflow_dispatch:
 
 jobs:
   build:
