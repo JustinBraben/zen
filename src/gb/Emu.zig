@@ -9,11 +9,13 @@ pub const Emu = @This();
 
 romPath: []const u8,
 emu_context: EmuContext,
+cartridge: Cart,
 
-pub fn new(pathToRom: []const u8) Emu {
+pub fn new(allocator: std.mem.Allocator, pathToRom: []const u8) Emu {
     return .{
         .romPath = pathToRom, 
         .emu_context = try EmuContext.init(),
+        .cartridge = Cart.init(allocator, pathToRom),
     };
 }
 

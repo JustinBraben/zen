@@ -11,7 +11,7 @@ license_codes: LicenseCodes,
 
 pub fn init(allocator: std.mem.Allocator, pathToRom: []const u8) Cart {
     return Cart{
-        .cart_context = CartContext.init(pathToRom),
+        .cart_context = try CartContext.init(pathToRom),
         .license_codes = LicenseCodes.init(allocator),
     };
 }

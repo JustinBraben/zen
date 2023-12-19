@@ -4,8 +4,8 @@ pub const CartContext = @This();
 
 filename: []const u8,
 rom_size: u32,
-rom_data: *u8,
-rom_header: *RomHeader,
+rom_data: u8,
+rom_header: RomHeader,
 
 pub fn init(pathToFile: []const u8) !CartContext {
     return CartContext{

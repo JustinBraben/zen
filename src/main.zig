@@ -13,7 +13,20 @@ const print = std.debug.print;
 pub fn main() !void {
     std.debug.print("\n", .{});
 
-    var emu = Emu.new("../roms/Legend of Zelda, The - Link's Awakening (G) [!].gb");
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+
+    // var licCodes: LicenseCodes = LicenseCodes.init(alloc);
+    // try licCodes.createLicCodes();
+    // defer licCodes.deinit();
+
+    // const entry = try licCodes.LicCodeMap.getOrPut(0);
+
+    // std.debug.print("Found entry : {s}\n", .{entry.value_ptr.*});
+
+    var emu = Emu.new(alloc, "../roms/Legend of Zelda, The - Link's Awakening (G) [!].gb");
 
     std.debug.print("Created new Emu : '{s}' , of type : '{}'\n", .{emu.romPath, @TypeOf(emu.romPath)});
 
@@ -22,19 +35,6 @@ pub fn main() !void {
     for(RomTypes) |RomType| {
         std.debug.print("Rom Type : {s}\n", .{RomType});
     }
-
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
-
-    const alloc = arena.allocator();
-
-    var licCodes: LicenseCodes = LicenseCodes.init(alloc);
-    try licCodes.createLicCodes();
-    defer licCodes.deinit();
-
-    const entry = try licCodes.LicCodeMap.getOrPut(0);
-
-    std.debug.print("Found entry : {s}\n", .{entry.value_ptr.*});
 
     const returnVal = try emu.emu_run();
 

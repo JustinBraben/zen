@@ -15,7 +15,7 @@ global_checksum: u16 = undefined,
 
 pub const RomHeader = @This();
 
-pub fn init() !RomHeader {
+pub fn init() RomHeader {
     return RomHeader{
         .entry              = undefined,
         .logo               = undefined,
