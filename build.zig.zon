@@ -42,6 +42,14 @@
             .url = "https://github.com/andrewrk/SDL/archive/3eb87f0f5b8d815d5a608b732e1d77f0876712d9.tar.gz",
             .hash = "122006f1d25dd112605ad00929f05e05da844decd4bc25996998814704344be87a09",
         },
+        .clap = .{
+            .url = "https://github.com/Hejsil/zig-clap/archive/refs/tags/0.7.0.tar.gz",
+            .hash = "1220f48518ce22882e102255ed3bcdb7aeeb4891f50b2cdd3bd74b5b2e24d3149ba2",
+        },
+        .@"zig-cli" = .{
+            .url = "https://github.com/sam701/zig-cli/archive/refs/tags/0.8.0.tar.gz",
+            .hash = "12205d064a9bd4dac1ebce2cead5bc686ee85eb703b994495efd3b65115666555cd7",
+        },
     },
 
     // Specifies the set of files and directories that are included in this package.
@@ -59,7 +67,7 @@
         "README.md",
         "build.zig",
         "build.zig.zon",
-        "src",
+        "./src",
         // For example...
         //"build.zig",
         //"build.zig.zon",

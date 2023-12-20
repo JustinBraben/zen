@@ -1,42 +1,34 @@
 const std = @import("std");
-const RomHeader = @import("RomHeader.zig").RomHeader;
-const LicenseCodes = @import("./configs/LicenseCodes.zig").LicenseCodes;
-const RomTypes = @import("./configs/RomTypes.zig").RomTypes;
-const CartContext = @import("CartContext.zig").CartContext;
+const fs = std.fs;
 
-pub const Cart = @This();
+const errors = @import("errors.zig");
 
-cart_context: CartContext,
-license_codes: LicenseCodes,
+const KB: u32 = 1024;
 
-pub fn init(allocator: std.mem.Allocator, pathToRom: []const u8) Cart {
-    return Cart{
-        .cart_context = try CartContext.init(pathToRom),
-        .license_codes = LicenseCodes.init(allocator),
+fn parseRomSize(val: u8) u32 {
+    return (32 * KB) << @as(u5, @intCast(val));
+}
+
+fn parseRamSize(val: u8) u32 {
+    return switch (val) {
+        0 => 0,
+        2 => 8 * KB,
+        3 => 32 * KB,
+        4 => 128 * KB,
+        5 => 64 * KB,
+        else => 0,
     };
 }
 
-pub fn cart_lic_name(self: *Cart) []const u8 {
-    if (self.cart_context.rom_header.new_lic_code <= 0xA4){
-        return self.license_codes.LicCodeMap.getOrPut(self.cart_context.rom_header.lic_code);
+pub const Cart = struct {
+    data: []const u8,
+
+    pub fn init(fileName: []const u8) !Cart {
+
+        std.debug.print("Printing Rom Name : {s}\n", .{fileName});
+
+        return Cart{
+            .data = fileName,
+        };
     }
-
-    return "UNKNOWN";
-}
-
-pub fn cart_type_name(self: *Cart) []const u8 {
-    if (self.cart_context.rom_header.typeName <= 0x22) {
-        return RomTypes[self.cart_context.rom_header.typeName];
-    }
-
-    return "UNKNOWN";
-}
-
-pub fn cart_load(self: *Cart) bool {
-    
-    const data = @embedFile(self.cart_context.filename);
-
-    std.debug.print("{}\n", .{data});
-
-    return true;
-}
+};
