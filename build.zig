@@ -10,6 +10,7 @@ pub fn build(b: *Builder) void {
         .target = target,
         .optimize = optimize,
     });
+
     if (target.isNativeOs() and target.getOsTag() == .linux) {
         // The SDL package doesn't work for Linux yet, so we rely on system
         // packages for now.
@@ -23,9 +24,18 @@ pub fn build(b: *Builder) void {
         exe.linkLibrary(sdl_dep.artifact("SDL2"));
     }
 
+    const clap = b.dependency("clap", .{
+        .optimize = .ReleaseFast,
+        .target = target,
+    });
+    exe.addModule("clap", clap.module("clap"));
+
     b.installArtifact(exe);
 
     const run = b.step("run", "Run the demo");
     const run_cmd = b.addRunArtifact(exe);
     run.dependOn(&run_cmd.step);
+    if (b.args) |args| {
+        run_cmd.addArgs(args);
+    }
 }
