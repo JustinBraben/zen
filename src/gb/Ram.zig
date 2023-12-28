@@ -162,7 +162,7 @@ pub const RAM = struct {
                 // Switchable ROM bank
                 const bank = self.rom_bank * ROM_BANK_SIZE;
                 const offset = addr - 0x4000;
-                val = self.car.data[offset + bank];
+                val = self.cart.data[offset + bank];
             },
             0x8000...0x9FFF => {
                 // VRAM
@@ -210,7 +210,6 @@ pub const RAM = struct {
             0xFFFF => {
                 // IE Register
             },
-            else => {},
         }
 
         if (self.debug) {
