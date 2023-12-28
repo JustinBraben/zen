@@ -1,11 +1,22 @@
 const std = @import("std");
 
-pub fn cpu_init() void {
+const RAM = @import("Ram.zig").RAM;
+const Constants = @import("configs/Constants.zig");
+const Errors = @import("Errors.zig");
 
-    return;
-}
+pub const CPU = struct {
+    ram: *RAM,
+    debug: bool,
 
-pub fn cpu_step() bool {
-    std.debug.print("Cpu not yet implemented.\n");
-    return false;
-}
+    pub fn init(ram: *RAM, debug: bool) !CPU {
+        return CPU{
+            .ram = ram,
+            .debug = debug,
+        };
+    }
+
+    pub fn tick(self: *CPU) !void {
+        _ = self; // autofix
+
+    }
+};
