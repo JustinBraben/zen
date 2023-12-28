@@ -3,6 +3,7 @@ const c = @cImport({
 });
 const std = @import("std");
 const Args = @import("gb/Args.zig").Args;
+const GameBoy = @import("gb/GameBoy.zig").GameBoy;
 
 const print = std.debug.print;
 
@@ -17,6 +18,12 @@ pub fn main() !void {
     defer parse_args.deinit();
 
     print("Args : {any}\n", .{parse_args});
+
+    var gameboy: GameBoy = undefined;
+    try gameboy.init(gpa, parse_args);
+    defer gameboy.deinit(gpa);
+
+    print("gameboy name : {s}\n", .{gameboy.cart.name});
 
     // while (parse_args.args_allocated.next()) |arg| {
     //     print("arg : {s}\n", .{arg});
