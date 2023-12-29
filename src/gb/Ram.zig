@@ -147,6 +147,10 @@ pub const RAM = struct {
         };
     }
 
+    /// The `get` function is responsible for reading a byte from the Gameboy's memory at the specified address.
+    /// It handles various memory regions, including ROM, VRAM, external RAM, work RAM, I/O registers, sprite attribute table, etc.
+    /// The function implements the memory mapping logic based on the address and ensures proper bank switching.
+    /// If debugging is enabled, it prints debug information about the memory read operation.
     pub fn get(self: *RAM, addr: u16) u8 {
         var val = self.data[addr];
         switch (addr) {
@@ -219,6 +223,10 @@ pub const RAM = struct {
         return val;
     }
 
+    /// The `set` function is responsible for writing a byte to the Gameboy's memory at the specified address.
+    /// It handles various memory regions, including ROM, VRAM, external RAM, work RAM, I/O registers, sprite attribute table, etc.
+    /// The function implements the memory mapping logic based on the address and ensures proper bank switching.
+    /// If debugging is enabled, it prints debug information about the memory write operation.
     pub fn set(self: *RAM, addr: u16, val: u8) void {
         if (self.debug) {
             std.io.getStdOut().writer().print("ram[{X:0>4}] <- {X:0>2}\n", .{ addr, val }) catch return;
