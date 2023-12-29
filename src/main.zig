@@ -22,8 +22,14 @@ pub fn main() !void {
     try gameboy.init(gpa, parse_args);
     defer gameboy.deinit(gpa);
 
+    defer c.SDL_Quit();
+
     gameboy.run() catch |err| {
         switch (err) {
+            Errors.ControlledExit.Timeout => {
+                // the place that we raise this prints the output
+                std.os.exit(0);
+            },
             Errors.ControlledExit.Quit => {
                 std.os.exit(0);
             },
@@ -37,14 +43,5 @@ pub fn main() !void {
         }
     };
 
-    // inline for (std.meta.fields(@TypeOf(gameboy))) |field| {
-    //     std.debug.print(field.name ++ " {any}", .{@as(field.type, @field(gameboy, field.name))});
-    // }
-    // print("\n", .{});
-
-    //print("logo : {any}, name : {s}, cart_type : {}\n", .{ gameboy.cart.logo, gameboy.cart.name, gameboy.cart.cart_type });
-
-    // while (parse_args.args_allocated.next()) |arg| {
-    //     print("arg : {s}\n", .{arg});
-    // }
+    std.os.exit(1);
 }
