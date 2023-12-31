@@ -287,14 +287,14 @@ pub const CPU = struct {
         // Check for extended instructions (0xCB prefix).
         if (op == 0xCB) {
             op = self.ram.get(self.pc + 1);
-            @memcpy(op_str[0..], OP_CB_NAMES[op][0..]);
+            std.mem.copyForwards(u8, op_str[0..], OP_CB_NAMES[op][0..]);
         } else {
             // For regular instructions, construct the opcode representation based on the opcode and its arguments.
             const base = OP_NAMES[op][0..];
             const arg = self.load_op(self.pc + 1, OP_TYPES[op]);
             switch (OP_TYPES[op]) {
                 0 => {
-                    @memcpy(op_str[0..], base);
+                    std.mem.copyForwards(u8, op_str[0..], base);
                 },
                 1 => {
                     // Format and replace the argument in the opcode string for u8.
