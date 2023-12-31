@@ -12,6 +12,7 @@ pub const GPU = struct {
     name: []const u8,
     headless: bool,
     debug: bool,
+    cycle: u32,
 
     pub fn init(cpu: *CPU, name: []const u8, headless: bool, debug: bool) !GPU {
         // Window
@@ -29,8 +30,8 @@ pub const GPU = struct {
             }
 
             const screen = c.SDL_CreateWindow("ZenBoy", c.SDL_WINDOWPOS_UNDEFINED, c.SDL_WINDOWPOS_UNDEFINED, width, height, c.SDL_WINDOW_OPENGL) orelse {
-                c.SDL_Log("Unable to create window: %s", c.SDL_GetError());
-                return error.SDLInitializationFailed;
+                c.SDL_Quit();
+                return error.SDLWindowCreationFailed;
             };
             _ = screen; // autofix
         }
@@ -40,6 +41,7 @@ pub const GPU = struct {
             .name = name,
             .headless = headless,
             .debug = debug,
+            .cycle = 0,
         };
     }
 
