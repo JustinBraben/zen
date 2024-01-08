@@ -4,7 +4,7 @@ const CPU = @import("Cpu.zig").CPU;
 const Constants = @import("configs/Constants.zig");
 
 const c = @cImport({
-    @cInclude("SDL2/SDL.h");
+    @cInclude("SDL3/SDL.h");
 });
 
 pub const GPU = struct {
@@ -29,7 +29,7 @@ pub const GPU = struct {
                 return error.SDLInitializationFailed;
             }
 
-            const screen = c.SDL_CreateWindow("ZenBoy", c.SDL_WINDOWPOS_UNDEFINED, c.SDL_WINDOWPOS_UNDEFINED, width, height, c.SDL_WINDOW_OPENGL) orelse {
+            const screen = c.SDL_CreateWindow("ZenBoy", width, height, c.SDL_WINDOW_OPENGL) orelse {
                 c.SDL_Quit();
                 return error.SDLWindowCreationFailed;
             };
