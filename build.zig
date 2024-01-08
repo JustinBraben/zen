@@ -23,6 +23,7 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.linkSystemLibrary("SDL3");
+    exe.linkLibC();
     exe.addLibraryPath(.{ .cwd_relative = "thirdparty/sdl3/lib" });
     exe.addIncludePath(.{ .cwd_relative = "thirdparty/sdl3/include" });
 

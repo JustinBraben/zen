@@ -3,9 +3,7 @@ const std = @import("std");
 const CPU = @import("Cpu.zig").CPU;
 const Constants = @import("configs/Constants.zig");
 
-const c = @cImport({
-    @cInclude("SDL3/SDL.h");
-});
+const c = @import("../clibs.zig");
 
 pub const GPU = struct {
     cpu: *CPU,
@@ -13,6 +11,10 @@ pub const GPU = struct {
     headless: bool,
     debug: bool,
     cycle: u32,
+
+    window: ?*c.SDL_Window,
+    renderer: ?*c.SDL_Renderer,
+    framebuffer: ?*c.SDL_Texture,
 
     pub fn init(cpu: *CPU, name: []const u8, headless: bool, debug: bool) !GPU {
         // Window
@@ -23,18 +25,45 @@ pub const GPU = struct {
             height = 144;
         }
 
+        var window: ?*c.SDL_Window = undefined;
+        var renderer: ?*c.SDL_Renderer = undefined;
+        var framebuffer: ?*c.SDL_Texture = undefined;
+
         if (!headless) {
-            if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
-                c.SDL_Log("Unable to initialize SDL: %s", c.SDL_GetError());
+            if (c.SDL_Init(c.SDL_INIT_VIDEO | c.SDL_INIT_AUDIO) != 0) {
                 return error.SDLInitializationFailed;
             }
 
-            const screen = c.SDL_CreateWindow("ZenBoy", width, height, c.SDL_WINDOW_OPENGL) orelse {
+            window = c.SDL_CreateWindow("ZenBoy", width, height, c.SDL_WINDOW_HIDDEN | c.SDL_WINDOW_VULKAN) orelse @panic("Failed to create SDL window");
+
+            _ = c.SDL_ShowWindow(window);
+
+            renderer = c.SDL_CreateRenderer(window, null, c.SDL_RENDERER_ACCELERATED) orelse {
+                c.SDL_DestroyWindow(window);
                 c.SDL_Quit();
-                return error.SDLWindowCreationFailed;
+                @panic("Failed to create SDL Renderer");
             };
-            _ = screen; // autofix
+
+            framebuffer = c.SDL_CreateTexture(renderer, c.SDL_PIXELFORMAT_ABGR8888, c.SDL_TEXTUREACCESS_STREAMING, @intCast(width), @intCast(height)) orelse {
+                c.SDL_DestroyRenderer(renderer);
+                c.SDL_DestroyWindow(window);
+                c.SDL_Quit();
+                @panic("Failed to create SDL frame buffer");
+            };
         }
+
+        // if (!headless) {
+        //     if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
+        //         c.SDL_Log("Unable to initialize SDL: %s", c.SDL_GetError());
+        //         return error.SDLInitializationFailed;
+        //     }
+
+        //     const screen = c.SDL_CreateWindow("ZenBoy", width, height, c.SDL_WINDOW_OPENGL) orelse {
+        //         c.SDL_Quit();
+        //         return error.SDLWindowCreationFailed;
+        //     };
+        //     _ = screen; // autofix
+        // }
 
         return GPU{
             .cpu = cpu,
@@ -42,6 +71,9 @@ pub const GPU = struct {
             .headless = headless,
             .debug = debug,
             .cycle = 0,
+            .window = window,
+            .renderer = renderer,
+            .framebuffer = framebuffer,
         };
     }
 
@@ -50,6 +82,17 @@ pub const GPU = struct {
         // CPU STOP stops all LCD activity until a button is pressed
         if (self.cpu.stop) {
             return;
+        }
+    }
+
+    pub fn deinit(self: *GPU) void {
+        if (self.debug) {
+            std.debug.print("GPU deinit has been called, closing sdl window if not headless\n", .{});
+        }
+
+        if (!self.headless) {
+            c.SDL_DestroyWindow(self.window);
+            c.SDL_Quit();
         }
     }
 };

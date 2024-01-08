@@ -3,6 +3,8 @@ const Args = @import("gb/Args.zig").Args;
 const GameBoy = @import("gb/GameBoy.zig").GameBoy;
 const Errors = @import("gb/Errors.zig");
 
+const c = @import("clibs.zig");
+
 const print = std.debug.print;
 
 pub fn main() !void {
@@ -15,30 +17,30 @@ pub fn main() !void {
     var parse_args = try Args.init(gpa);
     defer parse_args.deinit();
 
-    // var gameboy: GameBoy = undefined;
-    // try gameboy.init(gpa, parse_args);
-    // defer gameboy.deinit(gpa);
+    var gameboy: GameBoy = undefined;
+    try gameboy.init(gpa, parse_args);
+    defer gameboy.deinit(gpa);
 
-    // defer c.SDL_Quit();
+    defer c.SDL_Quit();
 
-    // gameboy.run() catch |err| {
-    //     switch (err) {
-    //         Errors.ControlledExit.Timeout => {
-    //             // the place that we raise this prints the output
-    //             std.os.exit(0);
-    //         },
-    //         Errors.ControlledExit.Quit => {
-    //             std.os.exit(0);
-    //         },
-    //         Errors.ControlledExit.Help => {
-    //             std.os.exit(0);
-    //         },
-    //         else => {
-    //             std.log.err("Unknown error {any}\n", .{err});
-    //             std.os.exit(5);
-    //         },
-    //     }
-    // };
+    gameboy.run() catch |err| {
+        switch (err) {
+            Errors.ControlledExit.Timeout => {
+                // the place that we raise this prints the output
+                std.os.exit(0);
+            },
+            Errors.ControlledExit.Quit => {
+                std.os.exit(0);
+            },
+            Errors.ControlledExit.Help => {
+                std.os.exit(0);
+            },
+            else => {
+                std.log.err("Unknown error {any}\n", .{err});
+                std.os.exit(5);
+            },
+        }
+    };
 
     // std.os.exit(1);
 }
