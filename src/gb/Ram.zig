@@ -164,7 +164,8 @@ pub const RAM = struct {
             },
             0x4000...0x7FFF => {
                 // Switchable ROM bank
-                const bank = self.rom_bank * ROM_BANK_SIZE;
+                const res = @mulWithOverflow(self.rom_bank, ROM_BANK_SIZE);
+                const bank = res[0];
                 const offset = addr - 0x4000;
                 val = self.cart.data[offset + bank];
             },
@@ -238,7 +239,8 @@ pub const RAM = struct {
             0x2000...0x3FFF => {
                 self.rom_bank_low = val;
                 self.rom_bank = (self.rom_bank_high << 5) | self.rom_bank_low;
-                if (self.rom_bank * ROM_BANK_SIZE > self.cart.rom_size) {
+                const res = @mulWithOverflow(self.rom_bank, ROM_BANK_SIZE);
+                if (res[0] > self.cart.rom_size) {
                     panic("Set rom_bank beyond the size of ROM");
                 }
             },

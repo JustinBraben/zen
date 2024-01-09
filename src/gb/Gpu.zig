@@ -117,6 +117,10 @@ pub const GPU = struct {
         //     _ = screen; // autofix
         // }
 
+        if (debug) {
+            std.debug.print("debug-gpa has been set \n", .{});
+        }
+
         return GPU{
             .cpu = cpu,
             .name = name,
@@ -154,60 +158,82 @@ pub const GPU = struct {
             }
         }
 
-        // const lx: u8 = @as(u8, @intCast(self.cycle % 114));
-        // const ly: u8 = @as(u8, @intCast((self.cycle / 114) % 154));
-        // self.cpu.ram.set(Constants.Mem.LY, ly);
+        const lx: u8 = @as(u8, @intCast(self.cycle % 114));
+        const ly: u8 = @as(u8, @intCast((self.cycle / 114) % 154));
+        self.cpu.ram.set(Constants.Mem.LY, ly);
 
-        // var stat = self.cpu.ram.get(Constants.Mem.STAT);
-        // stat &= ~Stat.LYC_EQUAL;
-        // stat &= ~Stat.MODE_BITS;
+        var stat = self.cpu.ram.get(Constants.Mem.STAT);
+        stat &= ~Stat.LYC_EQUAL;
+        stat &= ~Stat.MODE_BITS;
 
-        // // LYC compare & interrupt
-        // if (ly == self.cpu.ram.get(Constants.Mem.LYC)) {
-        //     stat |= Stat.LYC_EQUAL;
-        //     if (stat & Stat.LYC_INTERRUPT != 0) {
-        //         self.cpu.interrupt(Constants.Interrupt.STAT);
-        //     }
-        // }
+        // LYC compare & interrupt
+        if (ly == self.cpu.ram.get(Constants.Mem.LYC)) {
+            stat |= Stat.LYC_EQUAL;
+            if (stat & Stat.LYC_INTERRUPT != 0) {
+                self.cpu.interrupt(Constants.Interrupt.STAT);
+            }
+        }
 
-        // // Set mode
-        // if (lx == 0 and ly < 144) {
-        //     stat |= Stat.OAM;
-        //     if (stat & Stat.OAM_INTERRUPT != 0) {
-        //         self.cpu.interrupt(Constants.Interrupt.STAT);
-        //     }
-        // } else if (lx == 20 and ly < 144) {
-        //     stat |= Stat.DRAWING;
-        //     if (ly == 0) {
-        //         // TODO: how often should we update palettes?
-        //         // Should every pixel reference them directly?
-        //         self.update_palettes();
-        //         _ = c.SDL_SetRenderDrawColor(self.renderer, self.bgp[0].r, self.bgp[0].g, self.bgp[0].b, self.bgp[0].a);
-        //         _ = c.SDL_RenderClear(self.renderer);
-        //     }
-        //     try self.draw_line(ly);
-        //     if (ly == 143) {
-        //         if (self.debug) {
-        //             try self.draw_debug();
-        //         }
-        //         if (self.renderer) |hw_renderer| {
-        //             if (self.framebuffer) |hw_buffer| {
-        //                 if (self.framebuffer.?.*.pixels) |pixels| {
-        //                     // update() takes []const u8 but pixels are *anyopaque...
-        //                     // try hw_buffer.update(pixels, @intCast(usize, self.buffer.ptr.*.pitch), null);
-        //                     if (c.SDL_UpdateTexture(
-        //                         hw_buffer.ptr,
-        //                         null,
-        //                         pixels,
-        //                         @as(c_int, @intCast(self.buffer.ptr.*.pitch)),
-        //                     ) != 0) return c.SDL_GetError();
-        //                 }
-        //                 try hw_renderer.copy(hw_buffer, null, null);
-        //                 hw_renderer.present();
-        //             }
-        //         }
-        //     }
-        // } else if (lx == 63 and ly < 144) {
+        // Set mode
+        if (lx == 0 and ly < 144) {
+            stat |= Stat.OAM;
+            if (stat & Stat.OAM_INTERRUPT != 0) {
+                self.cpu.interrupt(Constants.Interrupt.STAT);
+            }
+        } else if (lx == 20 and ly < 144) {
+            stat |= Stat.DRAWING;
+            if (ly == 0) {
+                // TODO: how often should we update palettes?
+                // Should every pixel reference them directly?
+                self.update_palettes();
+                _ = c.SDL_SetRenderDrawColor(self.renderer, self.bgp[0].r, self.bgp[0].g, self.bgp[0].b, self.bgp[0].a);
+                _ = c.SDL_RenderClear(self.renderer);
+            }
+            try self.draw_line(ly);
+            if (ly == 143) {
+                if (self.debug) {
+                    try self.draw_debug();
+                }
+                if (self.renderer) |hw_renderer| {
+                    _ = hw_renderer; // autofix
+                    if (self.framebuffer) |hw_buffer| {
+                        var pixels: ?*anyopaque = null;
+                        var pitch: i32 = 0;
+
+                        if (c.SDL_LockTexture(self.framebuffer, null, &pixels, &pitch) != 0) {
+                            c.SDL_Log("Failed to lock texture: %s\n", c.SDL_GetError());
+                            return;
+                        }
+
+                        _ = c.SDL_UpdateTexture(hw_buffer, null, pixels, pitch);
+
+                        //hw_renderer.*.copy(hw_buffer, null, null);
+
+                        _ = c.SDL_UnlockTexture(self.framebuffer);
+
+                        _ = c.SDL_RenderClear(self.renderer);
+                        _ = c.SDL_RenderTexture(self.renderer, self.framebuffer, null, null);
+                        _ = c.SDL_RenderPresent(self.renderer);
+                    }
+                }
+                // if (self.renderer) |hw_renderer| {
+                //     if (self.framebuffer) |hw_buffer| {
+                //         if (self.framebuffer.?.*.pixels) |pixels| {
+                //             // update() takes []const u8 but pixels are *anyopaque...
+                //             // try hw_buffer.update(pixels, @intCast(usize, self.buffer.ptr.*.pitch), null);
+                //             if (c.SDL_UpdateTexture(
+                //                 hw_buffer.ptr,
+                //                 null,
+                //                 pixels,
+                //                 @as(c_int, @intCast(self.buffer.ptr.*.pitch)),
+                //             ) != 0) return c.SDL_GetError();
+                //         }
+                //         try hw_renderer.copy(hw_buffer, null, null);
+                //         hw_renderer.present();
+                //     }
+                // }
+            }
+        } //else if (lx == 63 and ly < 144) {
         //     stat |= Stat.HBLANK;
         //     if (stat & Stat.HBLANK_INTERRUPT != 0) {
         //         self.cpu.interrupt(Constants.Interrupt.STAT);
@@ -220,7 +246,7 @@ pub const GPU = struct {
         //     self.cpu.interrupt(Constants.Interrupt.VBLANK);
         // }
 
-        // self.cpu.ram.set(Constants.Mem.STAT, stat);
+        self.cpu.ram.set(Constants.Mem.STAT, stat);
     }
 
     fn update_palettes(self: *GPU) void {

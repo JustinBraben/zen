@@ -30,6 +30,7 @@ pub fn main() !void {
                 std.os.exit(0);
             },
             Errors.ControlledExit.Quit => {
+                gameboy.gpu.deinit();
                 std.os.exit(0);
             },
             Errors.ControlledExit.Help => {
